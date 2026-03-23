@@ -3,3 +3,4 @@ node_modules/
 *.log
 .npm
 .env
+talk-heroku-to-kamal.md
