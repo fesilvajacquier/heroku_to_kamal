@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>De Heroku a Kamal</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/black.css">
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+
+		<style>
+			:root {
+				--r-heading-font: 'Source Sans Pro', Helvetica, sans-serif;
+				--accent-red: #cc342d;
+				--accent-blue: #1a73e8;
+				--accent-green: #0d9488;
+				--accent-orange: #ea580c;
+				--accent-purple: #7c3aed;
+				--surface-dark: #1e1e2e;
+				--surface-mid: #2a2a3e;
+			}
+
+			.reveal {
+				font-size: 32px;
+			}
+
+			.hero-number {
+				font-size: 5em;
+				font-weight: 900;
+				line-height: 1;
+				margin-bottom: 0.2em;
+			}
+
+			.hero-number.red { color: var(--accent-red); }
+			.hero-number.blue { color: var(--accent-blue); }
+			.hero-number.green { color: var(--accent-green); }
+			.hero-number.orange { color: var(--accent-orange); }
+			.hero-number.purple { color: var(--accent-purple); }
+
+			.subtitle {
+				font-size: 0.7em;
+				opacity: 0.6;
+				text-transform: uppercase;
+				letter-spacing: 0.15em;
+			}
+
+			.reveal blockquote {
+				width: 85%;
+				padding: 1em 1.5em;
+				border-left: 6px solid var(--accent-red);
+				background: rgba(255,255,255,0.05);
+				font-style: italic;
+				font-size: 0.95em;
+				text-align: left;
+			}
+
+			.reveal blockquote.angry {
+				border-left-color: #ef4444;
+				background: rgba(239, 68, 68, 0.1);
+			}
+
+			.reveal blockquote.calm {
+				border-left-color: var(--accent-blue);
+				background: rgba(26, 115, 232, 0.05);
+			}
+
+			.reveal blockquote footer {
+				font-style: normal;
+				font-size: 0.7em;
+				opacity: 0.5;
+				margin-top: 0.5em;
+			}
+
+			.section-label {
+				font-size: 0.5em;
+				text-transform: uppercase;
+				letter-spacing: 0.2em;
+				opacity: 0.5;
+				margin-bottom: 0.5em;
+			}
+
+			.reveal table {
+				font-size: 0.75em;
+			}
+
+			.reveal table thead th {
+				border-bottom: 3px solid var(--accent-red);
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				font-size: 0.85em;
+			}
+
+			.reveal table td, .reveal table th {
+				padding: 0.5em 0.8em;
+			}
+
+			.timeline-item {
+				text-align: left;
+				padding: 0.3em 0;
+				border-left: 3px solid rgba(255,255,255,0.15);
+				padding-left: 1.2em;
+				margin-left: 0.5em;
+			}
+
+			.timeline-item.active {
+				border-left-color: var(--accent-red);
+			}
+
+			.two-col {
+				display: flex;
+				gap: 2em;
+				align-items: flex-start;
+			}
+
+			.two-col > * {
+				flex: 1;
+			}
+
+			.pill {
+				display: inline-block;
+				padding: 0.15em 0.6em;
+				border-radius: 1em;
+				font-size: 0.65em;
+				font-weight: bold;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				vertical-align: middle;
+			}
+
+			.pill.red { background: var(--accent-red); color: white; }
+			.pill.green { background: var(--accent-green); color: white; }
+			.pill.blue { background: var(--accent-blue); color: white; }
+			.pill.orange { background: var(--accent-orange); color: white; }
+			.pill.purple { background: var(--accent-purple); color: white; }
+
+			.dim { opacity: 0.4; }
+
+			.reveal .slide-number {
+				font-size: 14px;
+			}
+
+			.arrow-flow {
+				font-size: 1.1em;
+				letter-spacing: 0.02em;
+			}
+
+			.arrow-flow span {
+				opacity: 0.4;
+				margin: 0 0.2em;
+			}
+
+			.before-after td:nth-child(2) {
+				opacity: 0.4;
+				text-decoration: line-through;
+			}
+
+			.before-after td:nth-child(3) {
+				color: var(--accent-green);
+				font-weight: bold;
+			}
+
+			.reveal a {
+				text-decoration: underline;
+				text-decoration-style: dotted;
+				text-underline-offset: 0.15em;
+			}
+		</style>
+	</head>
+	<body>
+    <div class="reveal">
+      <div class="slides">
+
+        <!-- ============================================ -->
+        <!-- TITULO -->
+        <!-- ============================================ -->
+        <section data-background-color="#0f0f1a">
+          <div class="section-label">Ruby Meetup Buenos Aires — Marzo 2026</div>
+          <h1 style="font-size: 2.2em;">De Heroku<br>a <a href="https://kamal-deploy.org/" target="_blank" rel="noopener">Kamal</a></h1>
+          <p style="opacity: 0.6; font-size: 0.8em;">Migrando una app Rails multi-tenant con IA</p>
+          <aside class="notes">
+            Kamal es la herramienta de deploy de Basecamp/37signals. Usa Docker y SSH para deployar containers a cualquier servidor (VPS, bare metal, cloud). No necesita Kubernetes. Es lo que usa HEY y Basecamp en producción.
+          </aside>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- INTRO: Quien soy + encuadre -->
+        <!-- ============================================ -->
+        <section>
+          <section>
+            <p style="font-size: 1.3em;">Fernando E. Silva Jacquier</p>
+            <p class="subtitle">fesilvajacquier</p>
+            <div style="margin-top: 1.5em; font-size: 0.8em; opacity: 0.7;">
+              <p><a href="https://www.boxful.io" target="_blank" rel="noopener">Boxful</a> | <a href="https://www.safetypanel.com.ar" target="_blank" rel="noopener">SafetyPanel</a></p>
+            </div>
+          </section>
+          <section data-background-color="var(--surface-dark)">
+            <h3>Un disclaimer antes de arrancar</h3>
+          </section>
+          <section data-background-color="var(--surface-dark)">
+            <p style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0 auto; line-height: 1.8;">
+              Esta no es una charla con un gran takeaway al final.
+            </p>
+            <p class="fragment" style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Es una <strong>crónica</strong>.
+            </p>
+            <p class="fragment" style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Mis decisiones, mis errores, mi contexto — que puede no ser extrapolable al de ustedes.
+            </p>
+            <p class="fragment" style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8; opacity: 0.6;">
+              Solo espero que encuentren algo útil en ella.
+            </p>
+          </section>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- CONTEXTO: Que es SafetyPanel? -->
+        <!-- ============================================ -->
+        <section>
+          <section data-background-color="#1a1a2e">
+            <div class="section-label">Contexto</div>
+            <h2>SafetyPanel</h2>
+          </section>
+          <section>
+            <p style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0 auto; line-height: 1.8;">
+              Arrancó en 2020 como una <strong>app de capacitaciones</strong> encargada a una software factory.
+            </p>
+            <p class="fragment" style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              El dueño tiene una consultora de higiene y seguridad. Con el tiempo, sus requerimientos de negocio la transformaron en una <strong>plataforma completa de gestión de seguridad y compliance</strong>.
+            </p>
+            <aside class="notes">
+              HyS = Higiene y Seguridad (occupational health &amp; safety). En Argentina, las empresas están obligadas por ley a tener un servicio de HyS. SafetyPanel ayuda a gestionar capacitaciones, visitas, documentación, y cumplimiento normativo.
+            </aside>
+          </section>
+          <section>
+            <p style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0 auto; line-height: 1.8;">
+              A medida que la app resolvía más problemas, empezaron a <strong>dejar servicios de terceros</strong>.
+            </p>
+            <p class="fragment" style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Después, colegas, otras consultoras, incluso sus propios clientes empezaron a preguntar:
+            </p>
+            <p class="fragment" style="font-size: 1.3em; text-align: center; margin-top: 0.8em; color: var(--accent-blue);">
+              <em>"¿Podemos usar esto nosotros también?"</em>
+            </p>
+          </section>
+          <section>
+            <p style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0 auto; line-height: 1.8;">
+              Hoy tiene dos tipos de clientes:
+            </p>
+            <p class="fragment" style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              <strong style="color: var(--accent-orange);">Consultoras de HyS</strong> — como el dueño original
+            </p>
+            <p class="fragment" style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              <strong style="color: var(--accent-green);">Empresas</strong> — fábricas, plantas, operaciones con sus propias necesidades de seguridad
+            </p>
+            <p class="fragment" style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8; opacity: 0.7;">
+              En varios países de Sudamérica.
+            </p>
+          </section>
+          <section>
+            <div class="section-label">Multi-tenant, basada en subdominios</div>
+            <p style="font-size: 1.2em;">
+              Cada cliente tiene <code>acme.safetypanel.com.ar</code>
+            </p>
+            <p style="font-size: 0.8em; opacity: 0.6; margin-top: 1em;">
+              <a href="https://github.com/ErwinM/acts_as_tenant" target="_blank" rel="noopener"><code>acts_as_tenant</code></a>
+            </p>
+            <aside class="notes">
+              acts_as_tenant es una gem que agrega scoping automático a todos los queries por tenant. Se configura con set_current_tenant_through_filter y usa el subdominio del request para identificar al tenant. Cada query se scopea automáticamente — no podés acceder a datos de otro tenant por error.
+            </aside>
+          </section>
+          <section>
+            <div class="section-label">Stack a principios de 2026</div>
+            <p style="font-size: 1.1em;">
+              Rails 7.2 · Heroku · <a href="https://github.com/sidekiq/sidekiq" target="_blank" rel="noopener">Sidekiq</a> + Redis<br>
+              <a href="https://github.com/mileszs/wicked_pdf" target="_blank" rel="noopener">wicked_pdf</a> + wkhtmltopdf · Webpack
+            </p>
+            <aside class="notes">
+              wicked_pdf es un wrapper de wkhtmltopdf para Rails. wkhtmltopdf usa una versión vieja de WebKit (el motor de Safari) para renderizar HTML a PDF. El proyecto está sin mantenimiento desde hace años y tiene problemas conocidos de rendering con CSS moderno.
+            </aside>
+          </section>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- EL CHISTE -->
+        <!-- ============================================ -->
+        <section>
+          <section>
+            <h3>Esto es lo que hice</h3>
+          </section>
+          <section>
+            <pre style="font-size: 0.7em; text-align: left;"><code data-trim class="language-plaintext">
+> Migrá esta app de Heroku a un VPS con Kamal.
+  No cometas errores.
+            </code></pre>
+          </section>
+          <section>
+            <h2>¿Preguntas?</h2>
+            <p class="fragment" style="margin-top: 1.5em; opacity: 0.5; font-size: 0.8em;">Muchas gracias.</p>
+          </section>
+          <section data-background-color="var(--surface-dark)">
+            <p style="font-size: 1.2em; opacity: 0.7;">
+              Bueno, no fue tan así...
+            </p>
+          </section>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- POR QUE DEJAR HEROKU? -->
+        <!-- ============================================ -->
+        <section>
+          <section data-background-color="#2d1a1a">
+            <div class="section-label">Motivación</div>
+            <h2>¿Por qué dejar Heroku?</h2>
+          </section>
+
+          <section>
+            <h3>SSL wildcard</h3>
+            <p style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Automatizar certificados wildcard en Heroku era imposible o muy caro.
+            </p>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Tenía que <strong>renovar certificados manualmente cada 3 meses</strong>.
+            </p>
+            <aside class="notes">
+              Un certificado wildcard (*.safetypanel.com.ar) cubre todos los subdominios con un solo cert. Let's Encrypt los da gratis pero vencen cada 90 días. En Heroku, la renovación automática con ACM solo funciona para dominios individuales, no wildcard. La alternativa era el add-on SSL de Heroku que costaba bastante o renovar manualmente via CLI cada 3 meses.
+            </aside>
+          </section>
+
+          <section>
+            <h3>Cosas para modernizar</h3>
+            <p style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              wkhtmltopdf estaba sin mantenimiento. Las alternativas son Chrome-based.
+            </p>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Chrome necesita más memoria → dynos más grandes → <strong>más plata</strong>.
+            </p>
+            <aside class="notes">
+              Las alternativas modernas a wkhtmltopdf (Grover, ferrum_pdf, Puppeteer) todas usan Chrome/Chromium headless para renderizar. Chromium necesita ~100-200 MB de RAM por instancia. En un dyno de 512 MB que también corre Puma, esto fuerza un upgrade a 1 GB ($50/mes).
+            </aside>
+          </section>
+
+          <section>
+            <h3>El costo iba a ser un problema</h3>
+            <p style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              La app estaba creciendo en tráfico y clientes.
+            </p>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Escalar en Heroku es <strong>caro</strong>. Todavía no era un problema — pero no queríamos llegar a ese punto.
+            </p>
+            <aside class="notes">
+              Un dyno Standard-1X (512 MB) cuesta ~$25/mes. Standard-2X (1 GB) ~$50/mes. Agregar Redis (para Sidekiq) son otros ~$15/mes mínimo. Managed Postgres desde ~$9/mes. Para una app chica puede parecer poco, pero escalar horizontalmente (más dynos) o verticalmente (más RAM) se pone caro rápido comparado con un VPS donde controlás los recursos.
+            </aside>
+          </section>
+
+          <section>
+            <h3>Pensamos crecer</h3>
+            <p style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Muchas más features por delante. Muchos más clientes.
+            </p>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Necesitábamos <strong>modernizar el stack primero</strong> para que ese camino fuera más fácil.
+            </p>
+          </section>
+
+          <section data-background-color="var(--surface-dark)">
+            <h3>El <a href="https://world.hey.com/dhh/the-one-person-framework-711e6318" target="_blank" rel="noopener">One Person Framework</a></h3>
+            <p style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Rails está apostando al framework para una persona. Esta app la desarrolla y mantiene <strong>una persona</strong>.
+            </p>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Todo lo que se aparta del camino estándar de Rails es algo más para mantener.
+            </p>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Quería <strong>volver al camino principal</strong>: los defaults de Rails 8 están pensados para esto.
+            </p>
+            <aside class="notes">
+              Concepto de la keynote de DHH en Rails World 2024 (Toronto). Rails 8 viene con Solid Cache, Solid Queue, Kamal, Thruster, y Propshaft out of the box. La visión: un solo desarrollador puede tener una app en producción sin depender de servicios externos (Redis, Memcached) ni de PaaS caros. Apartarse del camino principal de Rails significa: más gems para mantener, más config custom, más cosas que pueden romperse en cada upgrade. Siguiendo los defaults de Rails 8, cada upgrade del framework mejora tu stack gratis. Kamal es el deployer oficial de Rails — es lo que reemplaza a Heroku en esta visión. Solid Cache y Solid Queue reemplazan Redis. Es exactamente lo que necesitábamos.
+            </aside>
+          </section>
+
+          <section data-background-color="var(--surface-dark)">
+            <div class="section-label">Y entonces, el 6 de febrero...</div>
+            <blockquote style="border-left-color: var(--accent-purple);">
+              "Today, Heroku is transitioning to a <strong>sustaining engineering model</strong> focused on stability, security, reliability, and support. [...] We're focusing our product and engineering investments on areas where we can deliver the greatest long-term customer value, including helping organizations build and deploy <strong>enterprise-grade AI</strong> in a secure and trusted way."
+              <footer>
+                <a href="https://www.heroku.com/blog/an-update-on-heroku/" target="_blank" rel="noopener" style="color: var(--accent-purple);">An Update on Heroku</a> — Feb 6, 2026
+              </footer>
+            </blockquote>
+            <aside class="notes">
+              "Sustaining engineering model" no es terminología estándar de la industria. Lo que se entiende es: no van a agregar features nuevas, solo mantener lo que hay. Salesforce (dueño de Heroku desde 2010) está redirigiendo recursos a IA empresarial. La comunidad lo interpretó como el comienzo del sunset, aunque Heroku nunca usó esa palabra explícitamente.
+            </aside>
+          </section>
+
+          <section data-background-color="var(--surface-dark)">
+            <p style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0 auto; line-height: 1.8;">
+              Algo que <em>queríamos</em> hacer por mejor ergonomía.
+            </p>
+            <p class="fragment" style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Algo que <em>necesitábamos</em> hacer para mantener los costos bajos.
+            </p>
+            <p class="fragment" style="font-size: 1.1em; text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Y ahora, había una motivación <strong style="color: var(--accent-orange);">externa</strong>.
+            </p>
+          </section>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- EL PLAN -->
+        <!-- ============================================ -->
+        <section>
+          <section data-background-color="#1a2d1a">
+            <div class="section-label">Estrategia</div>
+            <h2>9 pasos, un issue</h2>
+            <p style="opacity: 0.5; font-size: 0.8em;">Epic issue #430</p>
+          </section>
+          <section>
+            <table style="font-size: 0.7em;">
+              <thead>
+                <tr><th>Fase</th><th>Pasos</th><th>Objetivo</th></tr>
+              </thead>
+              <tbody>
+                <tr class="fragment"><td><span class="pill red">Base</span></td><td>1: Upgrade a Rails 8</td><td>Habilitar gems Solid</td></tr>
+                <tr class="fragment"><td><span class="pill orange">Sacar Redis</span></td><td>2–5: Solid Cache, ActiveJob, Solid Queue</td><td>Unica dep = PostgreSQL</td></tr>
+                <tr class="fragment"><td><span class="pill blue">Simplificar</span></td><td>6: wicked_pdf → Ferrum</td><td>Motor de PDF moderno</td></tr>
+                <tr class="fragment"><td><span class="pill green">Infra</span></td><td>7–9: DNS, Dockerfile + Kamal, Deploy</td><td>Dejar Heroku</td></tr>
+              </tbody>
+            </table>
+            <aside class="notes">
+              Las gems "Solid" son las nuevas dependencias de Rails 8 que reemplazan servicios externos por la base de datos. Solid Cache usa la DB como cache store (reemplaza Redis/Memcached). Solid Queue usa la DB para background jobs (reemplaza Sidekiq/Resque que necesitan Redis). El beneficio: PostgreSQL es la única dependencia externa.
+            </aside>
+          </section>
+          <section data-background-color="var(--surface-dark)">
+            <h3>Decisión clave</h3>
+            <p style="font-size: 1.2em;">
+              Upgradear Rails y cambiar las piezas internas<br>
+              <strong style="color: var(--accent-green);">en Heroku primero</strong>
+            </p>
+            <p class="fragment" style="opacity: 0.7; margin-top: 1em;">
+              Después migrar la infraestructura.<br>
+              El VPS recibe un stack limpio desde el día uno.
+            </p>
+            <aside class="notes">
+              La idea es minimizar la cantidad de variables que cambian al mismo tiempo. Si upgradeamos Rails, cambiamos el queue backend, el cache y el motor de PDF todo en Heroku primero, cada cambio se puede testear en producción de forma aislada. Cuando el VPS recibe la app, ya tiene el stack final — menos cosas que pueden fallar en el día del deploy.
+            </aside>
+          </section>
+          <section>
+            <div class="section-label">Cadena de dependencias</div>
+            <pre style="font-size: 0.55em;"><code data-trim data-noescape>
+Step 1 (Rails 8)
+  ├── Step 2 (Solid Cache)
+  ├── Step 3 (ActiveJob conversion)
+  │     └── Step 4 (Solid Queue) ─── Step 5 (Remove Redis)
+  └── Step 6 (Ferrum) ─── Step 7 (DNS) ─── Step 8 (Dockerfile) ─── Step 9 (Deploy)
+            </code></pre>
+          </section>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- EL SPRINT -->
+        <!-- ============================================ -->
+        <section>
+          <section data-background-color="#1a1a3d">
+            <div class="section-label">La crónica</div>
+            <h2>El Sprint</h2>
+            <p style="opacity: 0.5;">10 – 25 de febrero, 2026</p>
+          </section>
+
+          <!-- Feb 10 -->
+          <section data-background-color="var(--surface-dark)">
+            <div class="pill red" style="font-size: 0.5em;">Feb 10</div>
+            <h3 style="margin-top: 0.5em;">Cinco PRs en un día</h3>
+            <aside class="notes">
+              Mostrar el git log del 10 de febrero — seis PRs, progresión metódica de Rails 8 a sin Redis en horas. Cada PR se mergeó y deployó a Heroku antes de hacer el siguiente. Esto permitió detectar problemas en producción de forma incremental.
+            </aside>
+          </section>
+          <section>
+            <div style="text-align: left; max-width: 700px; margin: 0 auto;">
+              <div class="timeline-item active fragment">
+                <strong>#1</strong> — Rails 7.2.3 → 8.0.4
+              </div>
+              <div class="timeline-item active fragment">
+                <strong>#3</strong> — <a href="https://github.com/rails/solid_cache" target="_blank" rel="noopener">Solid Cache</a>
+              </div>
+              <div class="timeline-item active fragment">
+                <strong>#4</strong> — Sidekiq workers → ActiveJob
+              </div>
+              <div class="timeline-item active fragment">
+                <strong>#5</strong> — Sidekiq → <a href="https://github.com/rails/solid_queue" target="_blank" rel="noopener">Solid Queue</a> + <a href="https://github.com/rails/mission_control-jobs" target="_blank" rel="noopener">Mission Control</a>
+              </div>
+              <div class="timeline-item active fragment">
+                <strong>#6</strong> — Remove Redis
+              </div>
+            </div>
+            <aside class="notes">
+              Solid Cache: usa la DB como cache store. Se configura un max de 256 MB, y la gem se encarga de purgar entradas viejas. Solid Queue: reemplaza Sidekiq como queue backend. Usa tablas en la DB en vez de Redis. Mission Control: UI web (engine de Rails) para monitorear y gestionar los jobs de Solid Queue — similar al dashboard de Sidekiq. El paso #443 fue convertir los 2 workers que estaban escritos directamente contra la API de Sidekiq (Sidekiq::Worker) a ActiveJob, que es la abstracción de Rails que funciona con cualquier backend.
+            </aside>
+          </section>
+
+          <!-- Feb 11 -->
+          <section data-background-color="var(--surface-dark)">
+            <div class="pill orange" style="font-size: 0.5em;">Feb 11</div>
+            <h3 style="margin-top: 0.5em;">Framework Defaults + Motor de PDF</h3>
+          </section>
+          <section>
+            <h3>wicked_pdf → <a href="https://github.com/rubycdp/ferrum_pdf" target="_blank" rel="noopener">ferrum_pdf</a></h3>
+            <p class="subtitle">#7 — el cambio de código más grande</p>
+            <div style="text-align: left; max-width: 700px; margin: 1em auto 0;">
+              <p class="fragment">Nuevas acciones "preview" — renderizan el PDF como HTML</p>
+              <p class="fragment"><code>PdfTokenAuthenticatable</code> — tokens firmados, 30s de expiración</p>
+              <p class="fragment">Chrome navega a la URL de preview y captura el PDF</p>
+            </div>
+            <aside class="notes">
+              ferrum_pdf usa la gem Ferrum (wrapper del Chrome DevTools Protocol) para controlar un Chromium headless. El flujo es: 1) la app renderiza el PDF como HTML en una acción "preview", 2) genera un token firmado con MessageVerifier (expira en 30 segundos), 3) Chromium navega a la URL de preview con ese token, 4) captura el PDF con page.pdf(). El concern PdfTokenAuthenticatable permite que la acción preview se autentique con el token firmado en vez de la sesión de usuario, porque Chromium headless no tiene cookies de sesión.
+            </aside>
+          </section>
+          <section>
+            <h3>Primer problema en producción</h3>
+            <div class="hero-number orange">843 MB</div>
+            <p>en un dyno de 512 MB</p>
+            <div class="fragment" style="margin-top: 1em; font-size: 0.85em; opacity: 0.7;">
+              <code>batch_size</code> 500 → 100 ·
+              <code>polling_interval</code> 0.1s → 1s ·
+              <a href="https://jemalloc.net/" target="_blank" rel="noopener">jemalloc</a>
+            </div>
+            <aside class="notes">
+              Solid Queue hace polling a la DB para buscar jobs nuevos. Los defaults eran muy agresivos: batch_size 500 (cuántos jobs levanta por poll) y polling_interval 0.1s (cada cuánto pollea). Bajándolos se redujo mucho el uso de memoria. jemalloc es un memory allocator alternativo a glibc malloc. Reduce la fragmentación de memoria en Ruby significativamente (20-40% menos RSS). Se instala como buildpack en Heroku o como package en Docker.
+            </aside>
+          </section>
+
+          <!-- Feb 13-23 -->
+          <section data-background-color="var(--surface-dark)">
+            <div class="pill blue" style="font-size: 0.5em;">Feb 13–23</div>
+            <h3 style="margin-top: 0.5em;">Dockerfile + Config de Kamal</h3>
+            <p style="opacity: 0.5;">PR #22 — 12 commits, 19 archivos, +1198 líneas</p>
+          </section>
+          <section>
+            <div style="display: flex; justify-content: center; gap: 2em; flex-wrap: wrap;">
+              <div class="fragment" style="text-align: center; padding: 1em;">
+                <div style="font-size: 2em; font-weight: bold; color: var(--accent-blue);">Multi-stage</div>
+                <div class="subtitle">Dockerfile</div>
+                <div style="font-size: 0.7em; opacity: 0.5; margin-top: 0.5em;">ruby:3.4.4-slim</div>
+              </div>
+              <div class="fragment" style="text-align: center; padding: 1em;">
+                <div style="font-size: 2em; font-weight: bold; color: var(--accent-green);">485 líneas</div>
+                <div class="subtitle">bin/provision-vps</div>
+                <div style="font-size: 0.7em; opacity: 0.5; margin-top: 0.5em;">Hardening de Ubuntu 24.04</div>
+              </div>
+              <div class="fragment" style="text-align: center; padding: 1em;">
+                <div style="font-size: 2em; font-weight: bold; color: var(--accent-purple);">335 líneas</div>
+                <div class="subtitle">Guía de ops</div>
+                <div style="font-size: 0.7em; opacity: 0.5; margin-top: 0.5em;">docs/operations/infrastructure.md</div>
+              </div>
+            </div>
+            <aside class="notes">
+              Multi-stage Dockerfile: una etapa "build" que instala Node, compila assets y gems, y una etapa "runtime" que solo copia lo compilado. Esto reduce el tamaño de la imagen final significativamente. El script bin/provision-vps automatiza el hardening del servidor: firewall (ufw), fail2ban, SSH hardening (deshabilitar login por password, cambiar puerto), crear usuario deploy, instalar Docker, etc.
+            </aside>
+          </section>
+          <section>
+            <div class="section-label">Ingredientes clave</div>
+            <p style="font-size: 1.3em;">
+              <span class="fragment"><a href="https://jemalloc.net/" target="_blank" rel="noopener">jemalloc</a></span>
+              <span class="fragment"> · <a href="https://shopify.engineering/ruby-yjit-is-production-ready" target="_blank" rel="noopener">YJIT</a></span>
+              <span class="fragment"> · Chromium</span>
+              <span class="fragment"> · <a href="https://github.com/basecamp/thruster" target="_blank" rel="noopener">Thruster</a></span>
+            </p>
+            <aside class="notes">
+              YJIT (Yet another Just-In-Time compiler) es el JIT compiler de Ruby, desarrollado por Shopify. Incluido en Ruby desde 3.1. Se activa con RUBY_YJIT_ENABLE=1. Mejora el throughput de la app un 15-25% sin cambios de código. Thruster es un HTTP/2 proxy de Basecamp escrito en Go. Se pone delante de Puma y maneja: compresión de assets (gzip/br), HTTP/2, X-Sendfile para servir archivos, y caching de assets estáticos. Viene por default en las apps Rails 8 nuevas.
+            </aside>
+          </section>
+
+          <!-- Test en VM local -->
+          <section data-background-color="var(--surface-dark)">
+            <div class="pill blue" style="font-size: 0.5em;">Feb 24</div>
+            <h3 style="margin-top: 0.5em;">Pero primero — probar en local</h3>
+            <p style="opacity: 0.5; font-size: 0.9em;">Antes de tocar producción, deployar a una VM local</p>
+          </section>
+          <section>
+            <div class="section-label">La receta</div>
+            <div style="text-align: left; max-width: 700px; margin: 0 auto; font-size: 0.9em; line-height: 2;">
+              <p class="fragment">Levantar una VM Ubuntu con <a href="https://multipass.run/" target="_blank" rel="noopener"><strong>Multipass</strong></a></p>
+              <p class="fragment">Agregar entradas en <code>/etc/hosts</code> apuntando subdominios a la IP de la VM</p>
+              <p class="fragment">Configurar el browser para aceptar certs auto-firmados <span class="dim">— <a href="https://cybercafe.dev/thisisunsafe-bypassing-chrome-security-warnings/" target="_blank" rel="noopener"><code>thisisunsafe</code></a></span></p>
+              <p class="fragment">Correr <code>kamal setup</code> apuntando a la VM</p>
+            </div>
+            <aside class="notes">
+              Multipass es una herramienta de Canonical para crear VMs Ubuntu de forma rápida. Con "multipass launch" tenés una VM corriendo en segundos. Ideal para simular un VPS local. El truco de "thisisunsafe": cuando Chrome muestra un error de certificado y NO te da la opción "Proceed anyway" (como pasa con HSTS), podés escribir "thisisunsafe" en cualquier parte de la página (no hay input visible, simplemente tecleás) y Chrome bypasea la verificación del certificado. Es un interstitial bypass keyword hardcodeado en Chromium. Se necesita porque la VM tiene un cert auto-firmado que Chrome rechaza.
+            </aside>
+          </section>
+          <section data-background-color="var(--surface-dark)">
+            <div class="section-label">Y ahí empezaron los tropiezos</div>
+            <h3 style="color: var(--accent-orange);">Qué se rompió</h3>
+          </section>
+          <section>
+            <div style="text-align: left; max-width: 700px; margin: 0 auto;">
+              <div class="timeline-item active fragment">
+                <strong style="color: var(--accent-orange);">Docker permission denied</strong><br>
+                <span style="font-size: 0.8em; opacity: 0.7;">El usuario no estaba en el grupo docker</span>
+              </div>
+              <div class="timeline-item active fragment">
+                <strong style="color: var(--accent-orange);">Bloqueado de la VM</strong><br>
+                <span style="font-size: 0.8em; opacity: 0.7;">El hardening de seguridad fue demasiado agresivo — SSH rechazaba todas las conexiones</span>
+              </div>
+              <div class="timeline-item active fragment">
+                <strong style="color: var(--accent-orange);">Login fallaba en silencio</strong><br>
+                <span style="font-size: 0.8em; opacity: 0.7;">Cert auto-firmado + interacción con Turbo — sin error, simplemente no pasaba nada</span>
+              </div>
+            </div>
+            <aside class="notes">
+              El problema del login silencioso: Turbo Drive intercepta la respuesta del form de login. Con un cert auto-firmado, el browser bloquea requests internos de Turbo sin mostrar error visible. El usuario hace click en "Login" y no pasa nada. La solución fue aceptar el cert (thisisunsafe) en todas las URLs que la app usa internamente. El lockout de SSH: el script de hardening cambiaba el puerto de SSH, deshabilitaba password auth, y configuraba fail2ban todo junto. Si algo fallaba en la config de sshd, SSH se reiniciaba con una config inválida y no podías volver a entrar.
+            </aside>
+          </section>
+          <section>
+            <div style="text-align: left; max-width: 700px; margin: 0 auto;">
+              <div class="timeline-item active fragment">
+                <strong style="color: var(--accent-orange);">500 en un formulario</strong><br>
+                <span style="font-size: 0.8em; opacity: 0.7;"><code>Cannot get a signed_id for a new record</code></span>
+              </div>
+              <div class="timeline-item active fragment">
+                <strong style="color: var(--accent-orange);">Los PDFs mostraban un 404</strong><br>
+                <span style="font-size: 0.8em; opacity: 0.7;">Chromium dentro de Docker no podía resolver las URLs de subdominios</span>
+              </div>
+            </div>
+            <aside class="notes">
+              El error "Cannot get a signed_id for a new record" ocurre con Active Storage cuando intentás obtener el signed_id de un blob que todavía no se guardó en la DB. Esto puede pasar si el formulario asume que el attachment ya fue persistido. El 404 de PDFs: ferrum_pdf levanta un Chromium headless dentro del container Docker. Cuando Chromium intenta navegar a "acme.safetypanel.com.ar/preview/...", esa URL no resuelve a nada dentro del container — el DNS público apunta al server externo, no al localhost del container.
+            </aside>
+          </section>
+          <section>
+            <h3>El fix del PDF</h3>
+            <p style="font-size: 0.9em; opacity: 0.7;">Chromium dentro de Docker no puede resolver <code>acme.safetypanel.com.ar</code></p>
+            <pre class="fragment" style="font-size: 0.5em;"><code data-trim class="language-bash">
+--host-resolver-rules "MAP *.safetypanel.com.ar &lt;host-ip&gt;"
+            </code></pre>
+            <div style="margin-top: 1em; font-size: 0.8em;">
+              <p class="fragment"><code>KAMAL_HOST</code> provee la IP del servidor</p>
+              <p class="fragment"><code>--ignore-certificate-errors</code> <span class="dim">— Chromium no confía en la CA de Cloudflare</span></p>
+            </div>
+            <aside class="notes">
+              --host-resolver-rules es un flag de Chromium que permite overridear la resolución DNS para dominios específicos. Le decimos: "cuando veas *.safetypanel.com.ar, resolvelo a esta IP en vez de consultar DNS". KAMAL_HOST es una variable de entorno que Kamal setea automáticamente dentro del container con la IP del host donde está corriendo. Así Chromium puede llegar al propio servidor. --ignore-certificate-errors es necesario porque el origin cert de Cloudflare está firmado por una CA de Cloudflare que Chromium no reconoce como trusted.
+            </aside>
+          </section>
+          <section data-background-color="var(--surface-dark)">
+            <p style="font-size: 1.2em;">
+              Todo esto se descubrió <strong style="color: var(--accent-green);">antes</strong> de tocar producción.
+            </p>
+            <p class="fragment" style="opacity: 0.6; margin-top: 1em;">La VM local se pagó sola en una tarde.</p>
+          </section>
+
+          <!-- Feb 24 — deploy real -->
+          <section data-background-color="var(--surface-dark)">
+            <div class="pill green" style="font-size: 0.5em;">Feb 24</div>
+            <h3 style="margin-top: 0.5em;">Día del deploy</h3>
+            <p style="opacity: 0.5; font-size: 0.9em;">Ahora en serio</p>
+          </section>
+          <section>
+            <p>PR #22 mergeado.</p>
+            <div class="fragment" style="margin-top: 1.5em;">
+              <p style="color: var(--accent-orange);">Primer incendio:</p>
+              <p>El workflow de deploy necesitaba <code>contents: read</code> (#30)</p>
+              <p style="font-size: 0.75em; opacity: 0.5; margin-top: 0.5em;">Cuando seteás <code>permissions</code> explícitamente en GitHub Actions, todos los defaults se revocan.</p>
+            </div>
+            <aside class="notes">
+              En GitHub Actions, si no ponés el key "permissions" en el workflow YAML, todas las acciones tienen permisos de lectura por default. Pero en cuanto ponés "permissions:" para setear algo explícitamente (por ejemplo, packages: write para pushear a GHCR), TODOS los demás permisos pasan a "none". Hay que agregar explícitamente cada permiso que necesitás, incluyendo "contents: read" que normalmente viene gratis.
+            </aside>
+          </section>
+
+          <!-- Feb 25 -->
+          <section data-background-color="var(--surface-dark)">
+            <div class="pill purple" style="font-size: 0.5em;">Feb 25</div>
+            <h3 style="margin-top: 0.5em;">Go-Live + Primeros incendios</h3>
+          </section>
+
+          <section>
+            <h3>La app no manda emails</h3>
+            <p style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Como parte del QA después del deploy: entrar a la consola, disparar un mail via ActionMailer.
+            </p>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Timeout. <code style="color: var(--accent-orange);">Net::OpenTimeout</code>
+            </p>
+          </section>
+          <section>
+            <p style="text-align: left; max-width: 700px; margin: 0 auto; line-height: 1.8;">
+              Testeamos puertos desde el servidor:
+            </p>
+            <pre class="fragment" style="font-size: 0.5em;"><code data-trim class="language-bash">
+ssh deploy@&lt;vps-ip&gt; \
+  "timeout 5 bash -c '&lt;/dev/tcp/email-smtp.us-east-2.amazonaws.com/587' \
+  && echo OK || echo BLOCKED"
+# => BLOCKED
+            </code></pre>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8; color: var(--accent-orange);">
+              Puerto 587 bloqueado. Puerto 465 bloqueado. Todos los puertos SMTP bloqueados.
+            </p>
+            <aside class="notes">
+              El comando bash '&lt;/dev/tcp/host/port' es un truco de bash para testear si un puerto TCP está accesible. No necesita instalar telnet ni netcat. Si la conexión se establece, el comando sale con exit 0 (OK). Si no, timeout lo mata después de 5 segundos (BLOCKED). DigitalOcean bloquea los puertos SMTP (25, 465, 587) por default en todos los droplets para prevenir spam. No lo desbloquean ni pidiendo — es política de la plataforma.
+            </aside>
+          </section>
+          <section>
+            <p style="text-align: left; max-width: 700px; margin: 0 auto; line-height: 1.8;">
+              Contactamos al soporte de DigitalOcean:
+            </p>
+            <blockquote class="fragment" style="font-size: 0.85em;">
+              "We are restricting SMTP traffic across the DigitalOcean platform..."
+              <footer>DigitalOcean Support</footer>
+            </blockquote>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Pivot: reemplazamos SMTP con <strong style="color: var(--accent-green);"><a href="https://aws.amazon.com/ses/" target="_blank" rel="noopener" style="color: var(--accent-green);">AWS SES</a> API</strong> via <a href="https://github.com/aws/aws-sdk-ruby" target="_blank" rel="noopener"><code>aws-sdk-sesv2</code></a>.
+            </p>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8; opacity: 0.6;">
+              Deploy. Test. Funciona.
+            </p>
+            <aside class="notes">
+              AWS SES (Simple Email Service) se puede usar de dos formas: via SMTP o via API HTTP. Como SMTP estaba bloqueado, usamos la API directamente con la gem aws-sdk-sesv2. Ya teníamos una cuenta de AWS para S3 (Active Storage), así que fue cuestión de agregar la gem, configurar el delivery method en production.rb y usar las mismas credenciales IAM.
+            </aside>
+          </section>
+
+          <section>
+            <h3>Los jobs no reintentaban</h3>
+            <p style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Habiendo trabajado siempre con Sidekiq, estaba acostumbrado a que los reintentos los manejara el adapter.
+            </p>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Cuando migramos a Solid Queue, perdimos el esquema de reintentos.
+            </p>
+            <p class="fragment" style="text-align: left; max-width: 700px; margin: 0.5em auto; line-height: 1.8;">
+              Hubo que configurarlo explícitamente en <code>ApplicationJob</code>.
+            </p>
+            <pre class="fragment" style="font-size: 0.55em;"><code data-trim class="language-ruby">
+class ApplicationJob < ActiveJob::Base
+  retry_on StandardError, wait: :polynomially_longer, attempts: 5
+end
+            </code></pre>
+            <aside class="notes">
+              Sidekiq tiene su propio mecanismo de retries que funciona automáticamente: por default reintenta 25 veces con backoff exponencial. Esto funciona a nivel del adapter, no de ActiveJob. Cuando pasás a Solid Queue (o cualquier otro backend que no sea Sidekiq), perdés ese comportamiento. ActiveJob tiene su propio sistema de retries con retry_on, pero hay que configurarlo explícitamente. :polynomially_longer usa la fórmula (attempt^4) + 2 segundos — es decir, 3s, 18s, 83s, 258s para los primeros 4 reintentos.
+            </aside>
+          </section>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- EL WORKFLOW CON IA -->
+        <!-- ============================================ -->
+        <section>
+          <section data-background-color="#1a2d3d">
+            <div class="section-label">Colaboración</div>
+            <h2>El workflow con IA</h2>
+            <p style="opacity: 0.5; font-size: 0.8em;">Pair-programming con <a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank" rel="noopener">Claude Code</a></p>
+            <aside class="notes">
+              Claude Code es el CLI de Anthropic para Claude. Corre en la terminal, tiene acceso al filesystem, puede ejecutar comandos, leer y editar archivos. Funciona como un pair programmer que tiene contexto completo del proyecto. Se usó para toda la migración: desde el brainstorming del plan hasta los fixes post-deploy.
+            </aside>
+          </section>
+          <section>
+            <div style="display: flex; justify-content: center; gap: 3em; flex-wrap: wrap;">
+              <div class="fragment" style="text-align: center; width: 220px;">
+                <div style="font-size: 1.8em; font-weight: bold; color: var(--accent-blue);">Planificar</div>
+                <p style="font-size: 0.7em; opacity: 0.7;">Brainstorming, enfoque por fases, cadena de dependencias</p>
+              </div>
+              <div class="fragment" style="text-align: center; width: 220px;">
+                <div style="font-size: 1.8em; font-weight: bold; color: var(--accent-green);">Construir</div>
+                <p style="font-size: 0.7em; opacity: 0.7;">Script de provisionamiento de 485 líneas, Dockerfile, workflows de deploy</p>
+              </div>
+              <div class="fragment" style="text-align: center; width: 220px;">
+                <div style="font-size: 1.8em; font-weight: bold; color: var(--accent-orange);">Debuggear</div>
+                <p style="font-size: 0.7em; opacity: 0.7;">Permisos de CI, tuneo de memoria, rendering de PDF</p>
+              </div>
+            </div>
+          </section>
+          <section data-background-color="var(--surface-dark)">
+            <h3>Los planes como artefactos</h3>
+            <div style="text-align: left; max-width: 700px; margin: 1em auto 0; line-height: 1.8;">
+              <p class="fragment">Un <strong style="color: var(--accent-blue);">plan principal</strong> para el proyecto completo</p>
+              <p class="fragment">Un <strong style="color: var(--accent-blue);">plan por tarea</strong> antes de escribir código</p>
+              <p class="fragment">Siempre registrando <strong>requerimientos</strong>, <strong>criterios de éxito</strong> y <strong>decisiones clave</strong></p>
+            </div>
+            <aside class="notes">
+              El artefacto más valioso de la IA no fue el código — fueron los planes. Cada tarea arrancaba con un plan que documentaba: qué hay que hacer, por qué, cuáles son los criterios de éxito, y qué decisiones se tomaron. Esto servía como documentación viva y como checklist. El plan principal del proyecto (issue #430 original) tenía las 9 etapas con dependencias. Y cada PR tenía su propio plan con scope, test plan y follow-ups.
+            </aside>
+          </section>
+
+          <!-- Citas de los session logs -->
+          <section data-background-color="var(--surface-dark)">
+            <div class="section-label">De los session logs</div>
+            <h3>Cómo dirigí a la IA</h3>
+            <aside class="notes">
+              Las citas que siguen son textuales de los session logs de Claude Code (archivos JSONL en ~/.claude/projects/). Los sessions de antes del 19 de febrero no se conservan localmente.
+            </aside>
+          </section>
+          <section>
+            <blockquote class="calm">
+              "I have AWS Route 53, Cloudflare, and DonWeb open. Guide me step by step on how to migrate the DNS."
+              <footer>Sesión de migración de DNS — verificando en cada paso</footer>
+            </blockquote>
+            <aside class="notes">
+              DonWeb es el registrar del dominio .com.ar. La migración fue: 1) crear la zona en Cloudflare, 2) copiar todos los registros DNS de Route 53 a Cloudflare, 3) cambiar los nameservers en DonWeb para apuntar a Cloudflare, 4) esperar propagación, 5) verificar que emails sigan funcionando (DKIM/SPF/DMARC), 6) borrar la hosted zone en Route 53. Todo verificado paso a paso.
+            </aside>
+          </section>
+          <section>
+            <blockquote class="calm">
+              "Is there a way to test the deploy locally? I was thinking of spinning up a VM. Deploy to it. And test everything works. Does it make sense?"
+              <footer>Test en una VM local con Multipass antes de tocar producción</footer>
+            </blockquote>
+          </section>
+          <section>
+            <blockquote class="angry">
+              "Come on... the app is down! Think harder"
+              <footer>Día del deploy — pg_restore fallando, la DB managed solo accesible desde la VPC</footer>
+            </blockquote>
+            <aside class="notes">
+              El restore de la base de datos falló múltiples veces: 1) db:drop falló por "protected environment", 2) DISABLE_DATABASE_ENVIRONMENT_CHECK tuvo error de sintaxis, 3) pg_restore hizo timeout porque la DB managed de DigitalOcean solo es accesible desde droplets en la misma VPC, no desde la máquina local. La solución fue hacer SCP del dump al servidor y correr pg_restore desde un container Docker en el droplet, conectándose a la DB via la red interna de la VPC.
+            </aside>
+          </section>
+          <section>
+            <div class="section-label">El patrón</div>
+            <div style="text-align: left; max-width: 600px; margin: 0 auto; font-size: 1.1em; line-height: 2;">
+              <p class="fragment"><strong style="color: var(--accent-blue);">Yo</strong> decidí el rumbo</p>
+              <p class="fragment"><strong style="color: var(--accent-blue);">Yo</strong> proveí el material inicial</p>
+              <p class="fragment"><strong style="color: var(--accent-orange);">Los agentes</strong> escribieron el código</p>
+              <p class="fragment"><strong style="color: var(--accent-blue);">Yo</strong> verifiqué en cada paso</p>
+              <p class="fragment"><strong style="color: var(--accent-green);">Nosotros</strong> diagnosticamos las causas raíz</p>
+              <p class="fragment"><strong style="color: var(--accent-blue);">Yo</strong> corregí el rumbo cuando hizo falta</p>
+            </div>
+          </section>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- ESTADO ACTUAL -->
+        <!-- ============================================ -->
+        <section>
+          <section data-background-color="#1a3d2d">
+            <div class="section-label">Resultado</div>
+            <h2>Antes y Después</h2>
+          </section>
+          <section>
+            <table class="before-after" style="font-size: 0.65em;">
+              <thead>
+                <tr><th>Componente</th><th>Antes</th><th>Después</th></tr>
+              </thead>
+              <tbody>
+                <tr class="fragment"><td>Rails</td><td>7.2.3</td><td>8.0.4</td></tr>
+                <tr class="fragment"><td>Hosting</td><td>Heroku</td><td>DigitalOcean + Kamal 2</td></tr>
+                <tr class="fragment"><td>Background jobs</td><td>Sidekiq (Redis)</td><td>Solid Queue (PostgreSQL)</td></tr>
+                <tr class="fragment"><td>Caching</td><td>Memory store</td><td>Solid Cache (PostgreSQL)</td></tr>
+                <tr class="fragment"><td>PDF</td><td>wicked_pdf</td><td>ferrum_pdf (Chromium)</td></tr>
+                <tr class="fragment"><td>DNS</td><td>Route 53</td><td>Cloudflare</td></tr>
+                <tr class="fragment"><td>Deploy</td><td>git push heroku</td><td>kamal deploy via GH Actions</td></tr>
+                <tr class="fragment"><td>Redis</td><td>Requerido</td><td>Eliminado</td></tr>
+              </tbody>
+            </table>
+          </section>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- PREGUNTAS -->
+        <!-- ============================================ -->
+        <section data-background-color="#0f0f1a">
+          <h2>¿Preguntas?</h2>
+          <p style="margin-top: 2em; font-size: 0.7em; opacity: 0.5;">
+            <a href="https://github.com/fesilvajacquier/heroku_to_kamal" target="_blank" rel="noopener">github.com/fesilvajacquier/heroku_to_kamal</a>
+          </p>
+        </section>
+
+      </div>
+    </div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			Reveal.initialize({
+				hash: true,
+				transition: 'fade',
+				backgroundTransition: 'fade',
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>

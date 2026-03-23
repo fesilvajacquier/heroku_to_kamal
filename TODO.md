@@ -1,0 +1,2 @@
+- Evaluate removing the "Primer problema en producción" slide
+- Evaluate adding the fix for every "Qué se rompió" item
